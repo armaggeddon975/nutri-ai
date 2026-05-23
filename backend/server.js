@@ -1,7 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 
+const OpenAI = require("openai");
+
 require("dotenv").config();
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 const foods =
 require("./database/foods.json");
@@ -64,8 +70,7 @@ app.post("/chat", async (req, res) => {
   perguntasFrequentes[userMessage] =
   (perguntasFrequentes[userMessage] || 0) + 1;
 
-  let resposta =
-  "Desculpe, ainda estou aprendendo sobre isso.";
+let resposta = "";
 
   // SALVAR ALERGIAS
 
@@ -117,6 +122,63 @@ app.post("/chat", async (req, res) => {
 
           resposta =
           `⚠️ Atenção: ${alimento} pode conter ${alergia}.`;
+
+            if(resposta === ""){
+
+  try{
+
+    const completion =
+    await openai.chat.completions.create({
+
+      model:"gpt-4.1-mini",
+
+      messages:[
+
+        {
+          role:"system",
+
+          content:`
+Você é a NutriAI,
+uma inteligência artificial especialista em:
+
+- nutrição
+- alimentação saudável
+- alergias alimentares
+- qualidade de vida
+- vitaminas
+- dietas
+- saúde
+
+Responda de forma:
+- clara
+- moderna
+- amigável
+- profissional
+`
+        },
+
+        {
+          role:"user",
+          content:userMessage
+        }
+
+      ]
+
+    });
+
+    resposta =
+    completion.choices[0]
+    .message.content;
+
+  }catch(error){
+
+    console.error(error);
+
+    resposta =
+    "Erro ao conectar com a IA.";
+  }
+
+}
 
           return res.json({
             reply: resposta

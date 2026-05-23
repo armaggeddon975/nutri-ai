@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Dashboard NutriAI</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+  <div class="background"></div>
+
+  <section class="dashboard">
+
+    <h1>
+      Dashboard NutriAI 📊
+    </h1>
+
+    <div class="cards">
+
+      <div class="card">
+
+        <h2 id="total-questions">
+          0
+        </h2>
+
+        <p>
+          Perguntas Totais
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <h2 id="total-allergies">
+          0
+        </h2>
+
+        <p>
+          Alergias Registradas
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="chart-container">
+
+      <canvas id="questionsChart"></canvas>
+
+    </div>
+
+  </section>
+
+  <script src="dashboard.js"></script>
+
+</body>
+</html>

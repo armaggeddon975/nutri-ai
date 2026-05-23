@@ -185,3 +185,40 @@ button:hover{
   }
 
 }
+
+.dashboard{
+  padding:50px;
+}
+
+.dashboard h1{
+  font-size:3rem;
+  margin-bottom:40px;
+}
+
+.cards{
+  display:flex;
+  gap:30px;
+  margin-bottom:40px;
+  flex-wrap:wrap;
+}
+
+.card{
+  flex:1;
+  min-width:250px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  border-radius:25px;
+  padding:30px;
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.card h2{
+  font-size:3rem;
+  color:#22c55e;
+}
+
+.chart-container{
+  background:white;
+  border-radius:25px;
+  padding:30px;
+}
