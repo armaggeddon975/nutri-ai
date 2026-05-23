@@ -10,13 +10,39 @@ app.use(cors());
 app.use(express.json());
 
 /* =========================
+   PERSONALIDADE DA IA
+========================= */
+
+const personalidadeIA = {
+
+  nome: "NutriAI",
+
+  estilo: "amigável",
+
+  tom: "humano",
+
+  emojis: true
+
+};
+
+/* =========================
    MEMÓRIA DO USUÁRIO
 ========================= */
 
 let memoriaUsuario = {
+
   objetivo: "",
+
   alergias: [],
-  dieta: ""
+
+  dieta: "",
+
+  ultimaPergunta: "",
+
+  ultimoAssunto: "",
+
+  humor: "feliz"
+
 };
 
 /* =========================
@@ -45,6 +71,7 @@ const respostas = {
 
   amendoim:
     "O amendoim pode causar alergias graves."
+
 };
 
 /* =========================
@@ -72,6 +99,65 @@ const alimentosPerigosos = {
     "paçoca",
     "amendoim"
   ]
+
+};
+
+/* =========================
+   RESPOSTAS HUMANAS
+========================= */
+
+const respostasHumanas = {
+
+  banana: [
+
+    "🍌 A banana é excelente para energia e recuperação muscular.",
+
+    "🍌 Banana possui potássio e ajuda bastante no pré-treino.",
+
+    "🍌 É uma fruta muito boa para alimentação saudável."
+
+  ],
+
+  ovo: [
+
+    "🥚 O ovo possui proteínas de alta qualidade.",
+
+    "🥚 Excelente alimento para hipertrofia e recuperação muscular.",
+
+    "🥚 Rico em nutrientes importantes para o corpo."
+
+  ],
+
+  agua: [
+
+    "💧 A hidratação é essencial para saúde e metabolismo.",
+
+    "💧 Beber água ajuda energia, digestão e funcionamento do organismo.",
+
+    "💧 A água é fundamental para praticamente todo o corpo."
+
+  ],
+
+  frango: [
+
+    "🍗 O frango é uma proteína magra excelente para dietas.",
+
+    "🍗 Muito utilizado em alimentação fitness e hipertrofia.",
+
+    "🍗 Rico em proteínas importantes para músculos."
+
+  ],
+
+  aveia: [
+
+    "🌾 A aveia ajuda bastante na saciedade.",
+
+    "🌾 Excelente para café da manhã saudável.",
+
+    "🌾 Rica em fibras e boa para digestão."
+
+  ]
+
 };
 
 /* =========================
@@ -163,6 +249,9 @@ app.post("/chat", (req, res) => {
   const userMessage =
   req.body.message.toLowerCase();
 
+  memoriaUsuario.ultimaPergunta =
+  userMessage;
+
   let resposta = "";
 
   /* =========================
@@ -220,6 +309,7 @@ app.post("/chat", (req, res) => {
 
     resposta =
     "🥦 Perfeito! Vou focar em hábitos saudáveis.";
+
   }
 
   /* =========================
@@ -231,7 +321,9 @@ app.post("/chat", (req, res) => {
     userMessage.includes("alérgico")
   ) {
 
-    if (userMessage.includes("lactose")) {
+    if (
+      userMessage.includes("lactose")
+    ) {
 
       memoriaUsuario.alergias.push(
         "lactose"
@@ -265,6 +357,7 @@ app.post("/chat", (req, res) => {
 
       resposta =
       "⚠️ Entendi! Vou alertar você sobre amendoim.";
+
     }
 
   }
@@ -273,15 +366,23 @@ app.post("/chat", (req, res) => {
      ALERTA DE ALIMENTOS
   ========================= */
 
-  for (const alergia of memoriaUsuario.alergias) {
+  for (
+    const alergia of
+    memoriaUsuario.alergias
+  ) {
 
     const alimentos =
     alimentosPerigosos[alergia];
 
-    for (const alimento of alimentos) {
+    for (
+      const alimento of
+      alimentos
+    ) {
 
       if (
-        userMessage.includes(alimento)
+        userMessage.includes(
+          alimento
+        )
       ) {
 
         resposta =
@@ -297,24 +398,33 @@ app.post("/chat", (req, res) => {
      BUSCA NUTRICIONAL
   ========================= */
 
-  for (const food of foods) {
+  for (
+    const food of foods
+  ) {
 
     if (
-      userMessage.includes(food.nome)
+      userMessage.includes(
+        food.nome
+      )
     ) {
 
       resposta = `
 🍎 Alimento: ${food.nome}
 
-🔥 Calorias: ${food.calorias}
+🔥 Calorias:
+${food.calorias}
 
-💪 Proteínas: ${food.proteinas}g
+💪 Proteínas:
+${food.proteinas}g
 
-🍞 Carboidratos: ${food.carboidratos}g
+🍞 Carboidratos:
+${food.carboidratos}g
 
-🌾 Fibras: ${food.fibras}g
+🌾 Fibras:
+${food.fibras}g
 
-🧬 Vitaminas: ${food.vitaminas}
+🧬 Vitaminas:
+${food.vitaminas}
 `;
 
     }
@@ -325,10 +435,14 @@ app.post("/chat", (req, res) => {
      FAQ LOCAL
   ========================= */
 
-  for (const palavra in respostas) {
+  for (
+    const palavra in respostas
+  ) {
 
     if (
-      userMessage.includes(palavra)
+      userMessage.includes(
+        palavra
+      )
     ) {
 
       resposta =
@@ -353,10 +467,34 @@ app.post("/chat", (req, res) => {
       )
     ) {
 
-      resposta =
-      perguntasNutricionais[
-        palavra
-      ];
+      memoriaUsuario.ultimoAssunto =
+      palavra;
+
+      if (
+        respostasHumanas[palavra]
+      ) {
+
+        const lista =
+        respostasHumanas[palavra];
+
+        resposta =
+        lista[
+          Math.floor(
+            Math.random() *
+            lista.length
+          )
+        ];
+
+      }
+
+      else {
+
+        resposta =
+        perguntasNutricionais[
+          palavra
+        ];
+
+      }
 
     }
 
@@ -369,8 +507,6 @@ app.post("/chat", (req, res) => {
   if (
     userMessage.includes("dieta")
   ) {
-
-    // HIPERTROFIA
 
     if (
       memoriaUsuario.objetivo ===
@@ -406,8 +542,6 @@ app.post("/chat", (req, res) => {
 
     }
 
-    // EMAGRECIMENTO
-
     else if (
       memoriaUsuario.objetivo ===
       "emagrecimento"
@@ -438,8 +572,6 @@ app.post("/chat", (req, res) => {
 `;
 
     }
-
-    // SAUDÁVEL
 
     else {
 
@@ -477,7 +609,9 @@ app.post("/chat", (req, res) => {
      IA CONTEXTUAL
   ========================= */
 
-  if (resposta === "") {
+  if (
+    resposta === ""
+  ) {
 
     if (
       memoriaUsuario.objetivo ===
@@ -485,7 +619,9 @@ app.post("/chat", (req, res) => {
     ) {
 
       if (
-        userMessage.includes("café")
+        userMessage.includes(
+          "café"
+        )
       ) {
 
         resposta = `
@@ -501,7 +637,9 @@ app.post("/chat", (req, res) => {
       }
 
       else if (
-        userMessage.includes("almoço")
+        userMessage.includes(
+          "almoço"
+        )
       ) {
 
         resposta = `
@@ -516,21 +654,6 @@ app.post("/chat", (req, res) => {
 
       }
 
-      else if (
-        userMessage.includes("janta")
-      ) {
-
-        resposta = `
-🌙 Janta para hipertrofia:
-
-- carne magra
-- arroz integral
-- legumes
-- ovos
-`;
-
-      }
-
     }
 
     if (
@@ -539,23 +662,9 @@ app.post("/chat", (req, res) => {
     ) {
 
       if (
-        userMessage.includes("café")
-      ) {
-
-        resposta = `
-🥗 Café da manhã para emagrecimento:
-
-- frutas
-- aveia
-- ovos
-- chia
-- iogurte natural
-`;
-
-      }
-
-      else if (
-        userMessage.includes("almoço")
+        userMessage.includes(
+          "almoço"
+        )
       ) {
 
         resposta = `
@@ -570,6 +679,23 @@ app.post("/chat", (req, res) => {
       }
 
     }
+
+  }
+
+  /* =========================
+     CONTINUIDADE HUMANA
+  ========================= */
+
+  if (
+    resposta === "" &&
+    memoriaUsuario.ultimoAssunto !== ""
+  ) {
+
+    resposta = `
+😊 Ainda estamos falando sobre ${memoriaUsuario.ultimoAssunto}.
+
+Quer que eu explique mais detalhes sobre isso?
+`;
 
   }
 
@@ -598,23 +724,30 @@ app.post("/chat", (req, res) => {
       (altura * altura)
     ).toFixed(1);
 
-    let classificacao = "";
+    let classificacao =
+    "";
 
-    if (imc < 18.5) {
+    if (
+      imc < 18.5
+    ) {
 
       classificacao =
       "Abaixo do peso";
 
     }
 
-    else if (imc < 25) {
+    else if (
+      imc < 25
+    ) {
 
       classificacao =
       "Peso normal";
 
     }
 
-    else if (imc < 30) {
+    else if (
+      imc < 30
+    ) {
 
       classificacao =
       "Sobrepeso";
@@ -631,11 +764,14 @@ app.post("/chat", (req, res) => {
     resposta = `
 📊 Resultado do IMC
 
-⚖️ Peso: ${peso}kg
+⚖️ Peso:
+${peso}kg
 
-📏 Altura: ${altura}m
+📏 Altura:
+${altura}m
 
-🧮 IMC: ${imc}
+🧮 IMC:
+${imc}
 
 📌 Classificação:
 ${classificacao}
@@ -647,9 +783,11 @@ ${classificacao}
      RESPOSTA PADRÃO
   ========================= */
 
-  if (resposta === "") {
+  if (
+    resposta === ""
+  ) {
 
-    const respostasHumanas = [
+    const respostasPadrao = [
 
       "🥗 Posso ajudar você com alimentação saudável.",
 
@@ -666,10 +804,10 @@ ${classificacao}
     ];
 
     resposta =
-    respostasHumanas[
+    respostasPadrao[
       Math.floor(
         Math.random() *
-        respostasHumanas.length
+        respostasPadrao.length
       )
     ];
 
@@ -685,17 +823,20 @@ ${classificacao}
    DASHBOARD
 ========================= */
 
-app.get("/stats", (req, res) => {
+app.get(
+  "/stats",
+  (req, res) => {
 
-  res.json({
+    res.json({
 
-    perguntasFrequentes,
+      perguntasFrequentes,
 
-    memoriaUsuario
+      memoriaUsuario
 
-  });
+    });
 
-});
+  }
+);
 
 /* =========================
    SERVER
@@ -704,10 +845,13 @@ app.get("/stats", (req, res) => {
 const PORT =
 process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(
+  PORT,
+  () => {
 
-  console.log(
-    `Servidor rodando na porta ${PORT}`
-  );
+    console.log(
+      `Servidor rodando na porta ${PORT}`
+    );
 
-});
+  }
+);
