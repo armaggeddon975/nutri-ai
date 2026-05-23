@@ -61,6 +61,12 @@ const alimentosPerigosos = {
   ]
 };
 
+let memoriaUsuario = {
+  objetivo: "",
+  alergias: [],
+  dieta: ""
+};
+
 app.post("/chat", async (req, res) => {
 
   const userMessage =
@@ -70,6 +76,33 @@ app.post("/chat", async (req, res) => {
   (perguntasFrequentes[userMessage] || 0) + 1;
 
   let resposta = "";
+
+  if(
+  userMessage.includes("emagrecer")
+){
+
+  memoriaUsuario.objetivo =
+  "emagrecimento";
+
+}
+
+if(
+  userMessage.includes("ganhar massa")
+){
+
+  memoriaUsuario.objetivo =
+  "hipertrofia";
+
+}
+
+if(
+  userMessage.includes("saudável")
+){
+
+  memoriaUsuario.objetivo =
+  "alimentação saudável";
+
+}
 
   // SALVAR ALERGIAS
 
@@ -195,18 +228,28 @@ Uma inteligência artificial especialista em:
 
 - nutrição
 - alimentação saudável
-- alergias alimentares
-- qualidade de vida
-- vitaminas
+- hipertrofia
+- emagrecimento
 - dietas
-- saúde
+- alergias alimentares
+- vitaminas
+- qualidade de vida
 
-Responda sempre:
-- de forma clara
-- amigável
-- moderna
-- profissional
+Contexto atual do usuário:
+
+Objetivo:
+${memoriaUsuario.objetivo}
+
+Alergias:
+${alergiasUsuario.join(", ")}
+
+Responda:
+- naturalmente
+- como nutricionista virtual
+- de forma moderna
+- clara
 - objetiva
+- amigável
 `
           },
 
