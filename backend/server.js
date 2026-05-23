@@ -4,11 +4,6 @@ require("dotenv").config();
 
 const foods = require("./database/foods.json");
 
-const inteligencia =
-require(
-  "./database/inteligencia_nutricional.json"
-);
-
 const app = express();
 
 app.use(cors());
@@ -77,6 +72,86 @@ const alimentosPerigosos = {
     "paçoca",
     "amendoim"
   ]
+};
+
+/* =========================
+   IA INTELIGENTE
+========================= */
+
+const perguntasNutricionais = {
+
+  banana: `
+🍌 A banana é rica em:
+
+- potássio
+- fibras
+- vitaminas
+
+Ela ajuda na energia e recuperação muscular.
+`,
+
+  ovo: `
+🥚 O ovo possui:
+
+- proteína de alta qualidade
+- vitaminas
+- gorduras boas
+
+Excelente para hipertrofia.
+`,
+
+  frango: `
+🍗 O frango é uma proteína magra muito utilizada em dietas e ganho de massa muscular.
+`,
+
+  arroz: `
+🍚 O arroz fornece energia através dos carboidratos.
+`,
+
+  feijao: `
+🫘 O feijão é rico em fibras, ferro e proteínas vegetais.
+`,
+
+  aveia: `
+🌾 A aveia ajuda na saciedade e saúde intestinal.
+`,
+
+  whey: `
+💪 Whey protein auxilia na recuperação e construção muscular.
+`,
+
+  vitamina: `
+🧬 Vitaminas são essenciais para imunidade, energia e funcionamento do corpo.
+`,
+
+  agua: `
+💧 A hidratação é essencial para saúde e metabolismo.
+`,
+
+  dieta: `
+🥗 Uma dieta equilibrada deve conter proteínas, carboidratos, fibras e vitaminas.
+`,
+
+  salmao: `
+🐟 O salmão é rico em ômega 3 e proteínas.
+`,
+
+  brocolis: `
+🥦 O brócolis possui fibras, vitaminas e antioxidantes.
+`,
+
+  maca: `
+🍎 A maçã ajuda na saciedade e possui fibras importantes.
+`,
+
+  hipertrofia: `
+💪 Para hipertrofia é importante consumir proteínas e manter regularidade alimentar.
+`,
+
+  emagrecimento: `
+🥗 Para emagrecimento é importante déficit calórico e alimentação equilibrada.
+`
+
 };
 
 /* =========================
@@ -264,6 +339,30 @@ app.post("/chat", (req, res) => {
   }
 
   /* =========================
+     DETECÇÃO INTELIGENTE
+  ========================= */
+
+  for (
+    const palavra in
+    perguntasNutricionais
+  ) {
+
+    if (
+      userMessage.includes(
+        palavra
+      )
+    ) {
+
+      resposta =
+      perguntasNutricionais[
+        palavra
+      ];
+
+    }
+
+  }
+
+  /* =========================
      GERADOR DE DIETA
   ========================= */
 
@@ -374,42 +473,11 @@ app.post("/chat", (req, res) => {
 
   }
 
-/* =========================
-   INTELIGÊNCIA AVANÇADA
-========================= */
-
-for(
-  const pergunta of
-  inteligencia.duvidas_nutricionais
-){
-
-  if(
-    userMessage.includes(
-      pergunta.split(" ")[0]
-    )
-  ){
-
-    resposta = `
-🤖 Informação nutricional inteligente:
-
-${pergunta}
-
-Uma alimentação equilibrada é fundamental para saúde e qualidade de vida.
-`;
-
-  }
-
-}
-
   /* =========================
      IA CONTEXTUAL
   ========================= */
 
   if (resposta === "") {
-
-    /* =========================
-       HIPERTROFIA
-    ========================= */
 
     if (
       memoriaUsuario.objetivo ===
@@ -428,8 +496,6 @@ Uma alimentação equilibrada é fundamental para saúde e qualidade de vida.
 - aveia
 - pão integral
 - whey protein
-
-Esses alimentos ajudam no ganho de massa muscular.
 `;
 
       }
@@ -446,8 +512,6 @@ Esses alimentos ajudam no ganho de massa muscular.
 - frango
 - batata doce
 - legumes
-
-Uma refeição rica em proteínas e carboidratos complexos.
 `;
 
       }
@@ -463,17 +527,11 @@ Uma refeição rica em proteínas e carboidratos complexos.
 - arroz integral
 - legumes
 - ovos
-
-Ideal para recuperação muscular.
 `;
 
       }
 
     }
-
-    /* =========================
-       EMAGRECIMENTO
-    ========================= */
 
     if (
       memoriaUsuario.objetivo ===
@@ -492,8 +550,6 @@ Ideal para recuperação muscular.
 - ovos
 - chia
 - iogurte natural
-
-Alimentos leves e nutritivos ajudam no déficit calórico.
 `;
 
       }
@@ -509,35 +565,9 @@ Alimentos leves e nutritivos ajudam no déficit calórico.
 - salada
 - arroz integral
 - legumes
-
-Poucas calorias e alta saciedade.
 `;
 
       }
-
-    }
-
-    /* =========================
-       ALIMENTAÇÃO SAUDÁVEL
-    ========================= */
-
-    if (
-      memoriaUsuario.objetivo ===
-      "alimentação saudável"
-    ) {
-
-      resposta = `
-🥦 Alimentação saudável inclui:
-
-- frutas
-- verduras
-- proteínas magras
-- hidratação
-- fibras
-- alimentos naturais
-
-Evite excesso de açúcar e ultraprocessados.
-`;
 
     }
 
@@ -601,14 +631,11 @@ Evite excesso de açúcar e ultraprocessados.
     resposta = `
 📊 Resultado do IMC
 
-⚖️ Peso:
-${peso}kg
+⚖️ Peso: ${peso}kg
 
-📏 Altura:
-${altura}m
+📏 Altura: ${altura}m
 
-🧮 IMC:
-${imc}
+🧮 IMC: ${imc}
 
 📌 Classificação:
 ${classificacao}
@@ -622,28 +649,29 @@ ${classificacao}
 
   if (resposta === "") {
 
-const respostasHumanas = [
+    const respostasHumanas = [
 
-  "🥗 Posso ajudar você com alimentação saudável.",
+      "🥗 Posso ajudar você com alimentação saudável.",
 
-  "💪 Posso ajudar em hipertrofia e ganho de massa.",
+      "💪 Posso ajudar em hipertrofia e ganho de massa.",
 
-  "🍎 Tenho informações sobre vitaminas e nutrição.",
+      "🍎 Tenho informações sobre vitaminas e nutrição.",
 
-  "⚕️ Posso auxiliar sobre alergias alimentares.",
+      "⚕️ Posso auxiliar sobre alergias alimentares.",
 
-  "📊 Também consigo calcular IMC e gerar dietas.",
+      "📊 Também consigo calcular IMC e gerar dietas.",
 
-  "🥦 Posso recomendar refeições saudáveis."
-];
+      "🥦 Posso recomendar refeições saudáveis."
 
-resposta =
-respostasHumanas[
-  Math.floor(
-    Math.random() *
-    respostasHumanas.length
-  )
-];
+    ];
+
+    resposta =
+    respostasHumanas[
+      Math.floor(
+        Math.random() *
+        respostasHumanas.length
+      )
+    ];
 
   }
 
