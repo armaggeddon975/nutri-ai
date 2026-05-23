@@ -1,42 +1,55 @@
 const express = require("express");
 const cors = require("cors");
-const OpenAI = require("openai");
-
 require("dotenv").config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
-const foods =
-require("./database/foods.json");
+const foods = require("./database/foods.json");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-let alergiasUsuario = [];
+/* =========================
+   MEMÓRIA DO USUÁRIO
+========================= */
+
+let memoriaUsuario = {
+  objetivo: "",
+  alergias: [],
+  dieta: ""
+};
+
+/* =========================
+   ANALYTICS
+========================= */
 
 let perguntasFrequentes = {};
 
+/* =========================
+   FAQ LOCAL
+========================= */
+
 const respostas = {
 
-  "lactose":
+  lactose:
     "A lactose é um açúcar presente no leite e derivados.",
 
-  "gluten":
+  gluten:
     "O glúten é uma proteína encontrada no trigo, cevada e centeio.",
 
-  "banana":
+  banana:
     "A banana é rica em potássio, fibras e vitaminas.",
 
-  "diabetes":
+  diabetes:
     "Pessoas com diabetes devem controlar o consumo de açúcar.",
 
-  "amendoim":
+  amendoim:
     "O amendoim pode causar alergias graves."
 };
+
+/* =========================
+   ALIMENTOS PERIGOSOS
+========================= */
 
 const alimentosPerigosos = {
 
@@ -44,8 +57,8 @@ const alimentosPerigosos = {
     "leite",
     "queijo",
     "iogurte",
-    "manteiga",
-    "pizza"
+    "pizza",
+    "manteiga"
   ],
 
   gluten: [
@@ -61,50 +74,67 @@ const alimentosPerigosos = {
   ]
 };
 
-let memoriaUsuario = {
-  objetivo: "",
-  alergias: [],
-  dieta: ""
-};
+/* =========================
+   CHAT
+========================= */
 
-app.post("/chat", async (req, res) => {
+app.post("/chat", (req, res) => {
 
   const userMessage =
   req.body.message.toLowerCase();
 
+  let resposta = "";
+
+  /* =========================
+     ANALYTICS
+  ========================= */
+
   perguntasFrequentes[userMessage] =
   (perguntasFrequentes[userMessage] || 0) + 1;
 
-  let resposta = "";
+  /* =========================
+     OBJETIVOS
+  ========================= */
 
-  if(
-  userMessage.includes("emagrecer")
-){
+  if (
+    userMessage.includes("ganhar massa") ||
+    userMessage.includes("hipertrofia")
+  ) {
 
-  memoriaUsuario.objetivo =
-  "emagrecimento";
+    memoriaUsuario.objetivo =
+    "hipertrofia";
 
-}
+    resposta =
+    "💪 Entendi! Agora vou focar em alimentação para hipertrofia.";
 
-if(
-  userMessage.includes("ganhar massa")
-){
+  }
 
-  memoriaUsuario.objetivo =
-  "hipertrofia";
+  else if (
+    userMessage.includes("emagrecer")
+  ) {
 
-}
+    memoriaUsuario.objetivo =
+    "emagrecimento";
 
-if(
-  userMessage.includes("saudável")
-){
+    resposta =
+    "🥗 Entendi! Agora vou focar em alimentação para emagrecimento.";
 
-  memoriaUsuario.objetivo =
-  "alimentação saudável";
+  }
 
-}
+  else if (
+    userMessage.includes("alimentação saudável")
+  ) {
 
-  // SALVAR ALERGIAS
+    memoriaUsuario.objetivo =
+    "alimentação saudável";
+
+    resposta =
+    "🥦 Perfeito! Vou focar em hábitos saudáveis.";
+  }
+
+  /* =========================
+     ALERGIAS
+  ========================= */
 
   if (
     userMessage.includes("alergia") ||
@@ -113,79 +143,77 @@ if(
 
     if (userMessage.includes("lactose")) {
 
-      alergiasUsuario.push("lactose");
+      memoriaUsuario.alergias.push(
+        "lactose"
+      );
 
       resposta =
-      "Entendi. Vou alertar você sobre alimentos com lactose.";
+      "⚠️ Entendi! Vou alertar você sobre lactose.";
 
     }
 
-    else if (userMessage.includes("gluten")) {
+    else if (
+      userMessage.includes("gluten")
+    ) {
 
-      alergiasUsuario.push("gluten");
+      memoriaUsuario.alergias.push(
+        "gluten"
+      );
 
       resposta =
-      "Entendi. Vou alertar você sobre alimentos com glúten.";
+      "⚠️ Entendi! Vou alertar você sobre glúten.";
 
     }
 
-    else if (userMessage.includes("amendoim")) {
+    else if (
+      userMessage.includes("amendoim")
+    ) {
 
-      alergiasUsuario.push("amendoim");
+      memoriaUsuario.alergias.push(
+        "amendoim"
+      );
 
       resposta =
-      "Entendi. Vou alertar você sobre alimentos com amendoim.";
+      "⚠️ Entendi! Vou alertar você sobre amendoim.";
     }
 
   }
 
-  // VERIFICAR ALIMENTOS PERIGOSOS
+  /* =========================
+     ALERTA DE ALIMENTOS
+  ========================= */
 
-  else {
+  for (const alergia of memoriaUsuario.alergias) {
 
-    for (const alergia of alergiasUsuario) {
+    const alimentos =
+    alimentosPerigosos[alergia];
 
-      const alimentos =
-      alimentosPerigosos[alergia];
+    for (const alimento of alimentos) {
 
-      for (const alimento of alimentos) {
+      if (
+        userMessage.includes(alimento)
+      ) {
 
-        if (userMessage.includes(alimento)) {
-
-          resposta =
-          `⚠️ Atenção: ${alimento} pode conter ${alergia}.`;
-
-          return res.json({
-            reply: resposta
-          });
-
-        }
+        resposta =
+        `⚠️ Atenção: ${alimento} pode conter ${alergia}.`;
 
       }
 
     }
 
-    // FAQ LOCAL
+  }
 
-    for (const palavra in respostas) {
+  /* =========================
+     BUSCA NUTRICIONAL
+  ========================= */
 
-      if (userMessage.includes(palavra)) {
+  for (const food of foods) {
 
-        resposta = respostas[palavra];
+    if (
+      userMessage.includes(food.nome)
+    ) {
 
-        break;
-
-      }
-
-    }
-
-    // BUSCA NUTRICIONAL
-
-    for (const food of foods) {
-
-      if (userMessage.includes(food.nome)) {
-
-        resposta = `
+      resposta = `
 🍎 Alimento: ${food.nome}
 
 🔥 Calorias: ${food.calorias}
@@ -199,81 +227,189 @@ if(
 🧬 Vitaminas: ${food.vitaminas}
 `;
 
-      }
+    }
+
+  }
+
+  /* =========================
+     FAQ LOCAL
+  ========================= */
+
+  for (const palavra in respostas) {
+
+    if (
+      userMessage.includes(palavra)
+    ) {
+
+      resposta =
+      respostas[palavra];
 
     }
 
   }
 
-  // OPENAI
+  /* =========================
+     IA CONTEXTUAL
+  ========================= */
 
-  if(resposta === ""){
+  if (resposta === "") {
 
-    try{
+    /* =========================
+       HIPERTROFIA
+    ========================= */
 
-      const completion =
-      await openai.chat.completions.create({
+    if (
+      memoriaUsuario.objetivo ===
+      "hipertrofia"
+    ) {
 
-        model:"gpt-4.1-mini",
+      if (
+        userMessage.includes("café")
+      ) {
 
-        messages:[
+        resposta = `
+☀️ Café da manhã para hipertrofia:
 
-          {
-            role:"system",
+- ovos
+- banana
+- aveia
+- pão integral
+- whey protein
 
-            content:`
-Você é a NutriAI.
+Esses alimentos ajudam no ganho de massa muscular.
+`;
 
-Uma inteligência artificial especialista em:
+      }
 
-- nutrição
-- alimentação saudável
-- hipertrofia
-- emagrecimento
-- dietas
-- alergias alimentares
-- vitaminas
-- qualidade de vida
+      else if (
+        userMessage.includes("almoço")
+      ) {
 
-Contexto atual do usuário:
+        resposta = `
+🍛 Almoço para hipertrofia:
 
-Objetivo:
-${memoriaUsuario.objetivo}
+- arroz
+- feijão
+- frango
+- batata doce
+- legumes
 
-Alergias:
-${alergiasUsuario.join(", ")}
+Uma refeição rica em proteínas e carboidratos complexos.
+`;
 
-Responda:
-- naturalmente
-- como nutricionista virtual
-- de forma moderna
-- clara
-- objetiva
-- amigável
-`
-          },
+      }
 
-          {
-            role:"user",
-            content:userMessage
-          }
+      else if (
+        userMessage.includes("janta")
+      ) {
 
-        ]
+        resposta = `
+🌙 Janta para hipertrofia:
 
-      });
+- carne magra
+- arroz integral
+- legumes
+- ovos
 
-      resposta =
-      completion.choices[0]
-      .message.content;
+Ideal para recuperação muscular.
+`;
 
-    }catch(error){
-
-      console.error(error);
-
-      resposta =
-      "Erro ao conectar com a IA.";
+      }
 
     }
+
+    /* =========================
+       EMAGRECIMENTO
+    ========================= */
+
+    if (
+      memoriaUsuario.objetivo ===
+      "emagrecimento"
+    ) {
+
+      if (
+        userMessage.includes("café")
+      ) {
+
+        resposta = `
+🥗 Café da manhã para emagrecimento:
+
+- frutas
+- aveia
+- ovos
+- chia
+- iogurte natural
+
+Alimentos leves e nutritivos ajudam no déficit calórico.
+`;
+
+      }
+
+      else if (
+        userMessage.includes("almoço")
+      ) {
+
+        resposta = `
+🥙 Almoço para emagrecimento:
+
+- frango grelhado
+- salada
+- arroz integral
+- legumes
+
+Poucas calorias e alta saciedade.
+`;
+
+      }
+
+    }
+
+    /* =========================
+       ALIMENTAÇÃO SAUDÁVEL
+    ========================= */
+
+    if (
+      memoriaUsuario.objetivo ===
+      "alimentação saudável"
+    ) {
+
+      resposta = `
+🥦 Alimentação saudável inclui:
+
+- frutas
+- verduras
+- proteínas magras
+- hidratação
+- fibras
+- alimentos naturais
+
+Evite excesso de açúcar e ultraprocessados.
+`;
+
+    }
+
+  }
+
+  /* =========================
+     RESPOSTA PADRÃO
+  ========================= */
+
+  if (resposta === "") {
+
+    resposta = `
+🤖 Ainda estou aprendendo sobre isso.
+
+Posso ajudar com:
+
+- hipertrofia
+- emagrecimento
+- vitaminas
+- calorias
+- proteínas
+- alergias
+- alimentação saudável
+- dietas
+`;
 
   }
 
@@ -283,16 +419,28 @@ Responda:
 
 });
 
+/* =========================
+   DASHBOARD
+========================= */
+
 app.get("/stats", (req, res) => {
 
   res.json({
+
     perguntasFrequentes,
-    alergiasUsuario
+
+    memoriaUsuario
+
   });
 
 });
 
-const PORT = process.env.PORT || 3000;
+/* =========================
+   SERVER
+========================= */
+
+const PORT =
+process.env.PORT || 3000;
 
 app.listen(PORT, () => {
 
