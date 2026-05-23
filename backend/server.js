@@ -86,6 +86,16 @@ app.post("/chat", (req, res) => {
   let resposta = "";
 
   /* =========================
+     REGEX IMC
+  ========================= */
+
+  const pesoMatch =
+  userMessage.match(/peso\s(\d+)/);
+
+  const alturaMatch =
+  userMessage.match(/altura\s([\d.]+)/);
+
+  /* =========================
      ANALYTICS
   ========================= */
 
@@ -249,6 +259,117 @@ app.post("/chat", (req, res) => {
   }
 
   /* =========================
+     GERADOR DE DIETA
+  ========================= */
+
+  if (
+    userMessage.includes("dieta")
+  ) {
+
+    // HIPERTROFIA
+
+    if (
+      memoriaUsuario.objetivo ===
+      "hipertrofia"
+    ) {
+
+      resposta = `
+💪 Dieta para Hipertrofia
+
+☀️ Café da manhã:
+- ovos
+- banana
+- aveia
+- whey protein
+
+🍛 Almoço:
+- arroz
+- feijão
+- frango
+- legumes
+
+🥤 Lanche:
+- iogurte
+- castanhas
+
+🌙 Janta:
+- carne magra
+- arroz integral
+- ovos
+
+💧 Beba bastante água.
+`;
+
+    }
+
+    // EMAGRECIMENTO
+
+    else if (
+      memoriaUsuario.objetivo ===
+      "emagrecimento"
+    ) {
+
+      resposta = `
+🥗 Dieta para Emagrecimento
+
+☀️ Café da manhã:
+- frutas
+- chia
+- ovos
+
+🍛 Almoço:
+- salada
+- frango grelhado
+- arroz integral
+
+🥤 Lanche:
+- iogurte natural
+- frutas
+
+🌙 Janta:
+- legumes
+- proteína magra
+
+🚶 Inclua atividade física.
+`;
+
+    }
+
+    // SAUDÁVEL
+
+    else {
+
+      resposta = `
+🥦 Dieta Saudável
+
+☀️ Café da manhã:
+- frutas
+- aveia
+- ovos
+
+🍛 Almoço:
+- arroz
+- feijão
+- legumes
+- proteína
+
+🥤 Lanche:
+- castanhas
+- frutas
+
+🌙 Janta:
+- sopa
+- legumes
+- proteína magra
+
+💧 Mantenha boa hidratação.
+`;
+
+    }
+
+  }
+
+  /* =========================
      IA CONTEXTUAL
   ========================= */
 
@@ -387,6 +508,79 @@ Evite excesso de açúcar e ultraprocessados.
 `;
 
     }
+
+  }
+
+  /* =========================
+     IMC
+  ========================= */
+
+  if (
+    pesoMatch &&
+    alturaMatch
+  ) {
+
+    const peso =
+    parseFloat(
+      pesoMatch[1]
+    );
+
+    const altura =
+    parseFloat(
+      alturaMatch[1]
+    );
+
+    const imc =
+    (
+      peso /
+      (altura * altura)
+    ).toFixed(1);
+
+    let classificacao = "";
+
+    if (imc < 18.5) {
+
+      classificacao =
+      "Abaixo do peso";
+
+    }
+
+    else if (imc < 25) {
+
+      classificacao =
+      "Peso normal";
+
+    }
+
+    else if (imc < 30) {
+
+      classificacao =
+      "Sobrepeso";
+
+    }
+
+    else {
+
+      classificacao =
+      "Obesidade";
+
+    }
+
+    resposta = `
+📊 Resultado do IMC
+
+⚖️ Peso:
+${peso}kg
+
+📏 Altura:
+${altura}m
+
+🧮 IMC:
+${imc}
+
+📌 Classificação:
+${classificacao}
+`;
 
   }
 
