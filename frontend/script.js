@@ -126,3 +126,11 @@ userInput.addEventListener(
 
   }
 );
+
+function clearChat(){
+
+  localStorage.clear();
+
+  location.reload();
+
+}
