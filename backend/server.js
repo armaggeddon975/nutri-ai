@@ -4,6 +4,11 @@ require("dotenv").config();
 
 const foods = require("./database/foods.json");
 
+const inteligencia =
+require(
+  "./database/inteligencia_nutricional.json"
+);
+
 const app = express();
 
 app.use(cors());
@@ -369,6 +374,33 @@ app.post("/chat", (req, res) => {
 
   }
 
+/* =========================
+   INTELIGÊNCIA AVANÇADA
+========================= */
+
+for(
+  const pergunta of
+  inteligencia.duvidas_nutricionais
+){
+
+  if(
+    userMessage.includes(
+      pergunta.split(" ")[0]
+    )
+  ){
+
+    resposta = `
+🤖 Informação nutricional inteligente:
+
+${pergunta}
+
+Uma alimentação equilibrada é fundamental para saúde e qualidade de vida.
+`;
+
+  }
+
+}
+
   /* =========================
      IA CONTEXTUAL
   ========================= */
@@ -590,20 +622,28 @@ ${classificacao}
 
   if (resposta === "") {
 
-    resposta = `
-🤖 Ainda estou aprendendo sobre isso.
+const respostasHumanas = [
 
-Posso ajudar com:
+  "🥗 Posso ajudar você com alimentação saudável.",
 
-- hipertrofia
-- emagrecimento
-- vitaminas
-- calorias
-- proteínas
-- alergias
-- alimentação saudável
-- dietas
-`;
+  "💪 Posso ajudar em hipertrofia e ganho de massa.",
+
+  "🍎 Tenho informações sobre vitaminas e nutrição.",
+
+  "⚕️ Posso auxiliar sobre alergias alimentares.",
+
+  "📊 Também consigo calcular IMC e gerar dietas.",
+
+  "🥦 Posso recomendar refeições saudáveis."
+];
+
+resposta =
+respostasHumanas[
+  Math.floor(
+    Math.random() *
+    respostasHumanas.length
+  )
+];
 
   }
 
