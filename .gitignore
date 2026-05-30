@@ -2,3 +2,4 @@
 .env.local
 *.log
 data/food-cache.json
+.deploy/
