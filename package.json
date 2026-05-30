@@ -1,19 +1,20 @@
 {
   "name": "nutri-ai",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Scanner nutricional com alergias, banco mundial de alimentos e assistente de IA.",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "check": "node --check server.js && node --check app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "openai": "^6.39.0"
-  }
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "nutrition",
+    "barcode",
+    "openai",
+    "open-food-facts"
+  ],
+  "license": "UNLICENSED"
 }

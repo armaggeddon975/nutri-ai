@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nutri Ai | Scanner nutricional</title>
+    <meta
+      name="description"
+      content="Site informativo para pesquisar alimentos, verificar alergias, ler codigo de barras e conversar com um assistente de nutricao."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="#top" aria-label="Nutri Ai">
+        <span class="brand-mark">NA</span>
+        <span>Nutri Ai</span>
+      </a>
+      <nav class="nav-links" aria-label="Navegacao principal">
+        <a href="#scanner">Scanner</a>
+        <a href="#profile">Alergias</a>
+        <a href="#assistant">IA</a>
+        <a href="#library">Guia</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="workbench" aria-labelledby="headline">
+        <div class="workbench-copy">
+          <p class="eyebrow">Rotulos, alergias e orientacao nutricional</p>
+          <h1 id="headline">Confira alimentos antes de colocar no carrinho.</h1>
+          <p class="lead">
+            Pesquise por nome, digite o codigo de barras ou use a camera para ver tabela nutricional,
+            ingredientes, alergicos e uma leitura rapida para o seu perfil.
+          </p>
+
+          <form class="search-box" id="searchForm">
+            <label class="sr-only" for="productSearch">Produto ou codigo de barras</label>
+            <input
+              id="productSearch"
+              autocomplete="off"
+              placeholder="Ex.: iogurte, aveia, 7891000100103"
+              type="search"
+            />
+            <button type="submit" class="primary-action" title="Buscar produto">
+              Buscar
+            </button>
+          </form>
+
+          <div class="quick-picks" aria-label="Buscas rapidas">
+            <button type="button" data-query="iogurte natural">Iogurte</button>
+            <button type="button" data-query="barra de amendoim">Amendoim</button>
+            <button type="button" data-query="pao integral">Pao integral</button>
+          </div>
+        </div>
+
+        <figure class="hero-visual" aria-label="Alimentos e scanner de codigo de barras">
+          <img src="assets/nutrition-scanner-hero.png" alt="" />
+          <figcaption>
+            <span>Perfil ativo</span>
+            <strong id="heroProfileCount">0 alergias</strong>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="dashboard" aria-label="Ferramentas do Nutri Ai">
+        <aside class="panel profile-panel" id="profile">
+          <div class="panel-heading">
+            <span class="section-icon">!</span>
+            <div>
+              <p class="eyebrow">Perfil</p>
+              <h2>Alergias do usuario</h2>
+            </div>
+          </div>
+          <div class="allergy-grid" id="allergyList"></div>
+        </aside>
+
+        <section class="panel product-panel" id="product" aria-live="polite">
+          <div class="panel-title-row">
+            <div>
+              <p class="eyebrow">Resultado</p>
+              <h2>Produto analisado</h2>
+            </div>
+            <span class="data-source" id="sourceBadge">Banco mundial</span>
+          </div>
+          <div class="product-view" id="productView"></div>
+        </section>
+
+        <section class="panel scanner-panel" id="scanner">
+          <div class="panel-heading">
+            <span class="section-icon">[]</span>
+            <div>
+              <p class="eyebrow">Camera</p>
+              <h2>Leitor de codigo</h2>
+            </div>
+          </div>
+
+          <div class="scanner-stage">
+            <video id="scannerVideo" playsinline muted></video>
+            <div class="scan-frame" aria-hidden="true"></div>
+            <p id="scannerStatus">Camera inativa</p>
+          </div>
+
+          <div class="scanner-actions">
+            <button type="button" id="startScanner" class="primary-action" title="Abrir camera">
+              Camera
+            </button>
+            <button type="button" id="stopScanner" class="ghost-action" title="Parar camera">
+              Parar
+            </button>
+          </div>
+
+          <form class="barcode-form" id="barcodeForm">
+            <label for="barcodeInput">Codigo de barras</label>
+            <div>
+              <input id="barcodeInput" inputmode="numeric" placeholder="789..." />
+              <button type="submit" class="ghost-action">Verificar</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel ai-panel" id="assistant">
+          <div class="panel-title-row">
+            <div>
+              <p class="eyebrow">IA</p>
+              <h2>Assistente de nutricao</h2>
+            </div>
+            <span class="data-source" id="aiSourceBadge">Backup local</span>
+          </div>
+
+          <div class="chat-log" id="chatLog" aria-live="polite"></div>
+          <div class="prompt-chips" aria-label="Perguntas prontas">
+            <button type="button" data-prompt="Esse produto combina com minhas alergias?">Alergias</button>
+            <button type="button" data-prompt="A tabela nutricional desse produto e equilibrada?">Tabela</button>
+            <button type="button" data-prompt="O que devo observar nesse alimento?">Observacao</button>
+          </div>
+          <form class="chat-form" id="chatForm">
+            <label class="sr-only" for="chatInput">Pergunte sobre nutricao</label>
+            <input id="chatInput" autocomplete="off" placeholder="Pergunte sobre nutricao..." />
+            <button type="submit" class="primary-action" title="Enviar pergunta">Enviar</button>
+          </form>
+        </section>
+      </section>
+
+      <section class="library" id="library" aria-labelledby="libraryTitle">
+        <div class="library-heading">
+          <p class="eyebrow">Guia rapido</p>
+          <h2 id="libraryTitle">Pontos de atencao por alergia</h2>
+        </div>
+        <div class="guide-grid">
+          <article>
+            <h3>Leite e lactose</h3>
+            <p>Procure leite, lactose, caseina, soro de leite, creme, manteiga e derivados.</p>
+          </article>
+          <article>
+            <h3>Gluten</h3>
+            <p>Fique atento a trigo, cevada, centeio, malte e contaminacao cruzada.</p>
+          </article>
+          <article>
+            <h3>Amendoim e castanhas</h3>
+            <p>Verifique pasta, oleo, farinha, extrato, mix de nuts e linhas compartilhadas.</p>
+          </article>
+          <article>
+            <h3>Soja e ovo</h3>
+            <p>Ingredientes como lecitina, albumina, clara, gema e proteina vegetal podem aparecer em ultraprocessados.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Nutri Ai mostra informacoes gerais e nao substitui acompanhamento medico ou nutricional.</p>
+    </footer>
+  </body>
+</html>
